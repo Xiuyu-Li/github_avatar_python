@@ -19,7 +19,7 @@ These prerequisites could be installed by
 $ pip3 install [package name]
 ```
 
-### Runing
+### Running
 
 `github_avatar_generator.py` contains a class `GithubAvatarGenerator` and can be run directly as well.
 
