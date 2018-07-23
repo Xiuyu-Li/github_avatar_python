@@ -92,6 +92,10 @@ class GithubAvatarGenerator:
         img = self._get_avatar_data()
         cv2.imshow('My pic', img)
         cv2.waitKey()
+        
+    def save_avatar(self, filepath):
+        img = self._get_avatar_data()
+        cv2.imwrite(filepath, img)
     
 if __name__ == '__main__':
     gen = GithubAvatarGenerator()
