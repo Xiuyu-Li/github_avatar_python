@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-import random, math
+import random
+import math
 import numpy as np
 import cv2
+import os
+import sys
+
 
 class GithubAvatarGenerator:
     '''
@@ -19,11 +23,11 @@ class GithubAvatarGenerator:
         - Call get_randowm_avatar()
     '''
 
-    avatar_width = 420 # the length of line of the avatar
-    block_vertex_dimension = 5 # the dimension of block vertex
-    block_width = 70 # the length of line of block
-    background_color = [230, 230, 230] # the brackground color 
-    frame_width = 35 # the width of frame surrounding block vertex
+    avatar_width = 420  # the length of line of the avatar
+    block_vertex_dimension = 5  # the dimension of block vertex
+    block_width = 70  # the length of line of block
+    background_color = [230, 230, 230]  # the brackground color
+    frame_width = 35  # the width of frame surrounding block vertex
     # some color that might be approiprate for the color of block.
     color_pool_rgb = (
         (170, 205, 102),
@@ -47,12 +51,13 @@ class GithubAvatarGenerator:
         This 5*5 vertex denotes the strcture of 5*5 block vertex in github avatar
         '''
         # get 5*5 2d array full of False
-        avatar_vertex = np.empty((self.block_vertex_dimension, self.block_vertex_dimension), dtype=np.bool)
+        avatar_vertex = np.empty(
+            (self.block_vertex_dimension, self.block_vertex_dimension), dtype=np.bool)
 
         for row in avatar_vertex:
             for i in range(math.ceil(self.block_vertex_dimension / 2)):
                 row[i] = True if random.randint(0, 1) == 1 else False
-        # copy left half to right half    
+        # copy left half to right half
         for row in avatar_vertex:
             for i in range(math.floor(self.block_vertex_dimension / 2)):
                 row[self.block_vertex_dimension - 1 - i] = row[i]
@@ -64,7 +69,8 @@ class GithubAvatarGenerator:
         Generate a 3d array contains color info in each pixel in the avatar
         '''
         # fill the whole img with the background
-        avatar_data = np.zeros((self.avatar_width, self.avatar_width, 3), dtype=np.uint8)
+        avatar_data = np.zeros(
+            (self.avatar_width, self.avatar_width, 3), dtype=np.uint8)
         avatar_data[:][:] = self.background_color
 
         rand_color_index = random.randint(0, len(self.color_pool_rgb))
@@ -77,7 +83,8 @@ class GithubAvatarGenerator:
             for j in range(len(avatar_vertex[i])):
                 is_True = avatar_vertex[i][j]
                 if is_True:
-                    up_left_point = (self.frame_width + i * self.block_width, self.frame_width + j * self.block_width)
+                    up_left_point = (
+                        self.frame_width + i * self.block_width, self.frame_width + j * self.block_width)
                     for k in range(self.block_width):
                         for l in range(self.block_width):
                             lvl1 = k + up_left_point[0]
@@ -85,18 +92,39 @@ class GithubAvatarGenerator:
                             avatar_data[lvl1][lvl2] = rand_color
                 else:
                     continue
-        
+
         return avatar_data
 
     def get_random_avatar(self):
         img = self._get_avatar_data()
         cv2.imshow('My pic', img)
-        cv2.waitKey()
-        
-    def save_avatar(self, filepath):
-        img = self._get_avatar_data()
-        cv2.imwrite(filepath, img)
-    
+        cv2.waitKey(1)
+
+        # let the user decide whether to save the image
+        print('Do you want to save this avatar? [y/n]')
+
+        while True:
+            arg = input()
+
+            if (arg != 'y' and arg != 'yes' and arg != 'n' and arg != 'no'):
+                print('Please input yes (y) or no (n).')
+            if arg == 'y' or arg == 'yes':
+                print('Please input the path that you want to save the image.')
+
+                # Repeat the path input process untill the path is right
+                while True:
+                    filepath = input()
+                    if not os.path.exists(filepath):
+                        print('Cannot find the filepath, pleae input again.')
+                    else:
+                        cv2.imwrite(os.path.join(filepath, 'avatar.jpg'), img)
+                        print('Successfully saved!')
+                        sys.exit(0)
+
+            if arg == 'n' or arg == 'no':
+                sys.exit(0)
+
+
 if __name__ == '__main__':
     gen = GithubAvatarGenerator()
     gen.get_random_avatar()
